@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Authors</title>
+</head>
+<body>
+    <h1>BookTech Author list</h1>
+
+    {% for author in authors %}
+        <p>
+            ID: {{ author.id }} |
+            <a href="{% url 'book_by_author' author.id %}">
+                {{ author.first_name }} {{ author.last_name }}
+            </a>
+        </p>
+    {% endfor %}
+</body>
+</html>
