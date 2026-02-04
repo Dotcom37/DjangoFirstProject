@@ -6,7 +6,7 @@ from .models import Book , Author , Publisher
 from django.views.generic import ListView
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
-from .forms import BookForm
+from .forms import BookForm, AuthorForm, AuthorFormWithoutAuthor
 
 def book_list(request):
     books = Book.objects.all()
@@ -39,15 +39,6 @@ def book_by_author(request, author_id):
     context = {'author': author, 'books': books}
     return render(request, 'library/book_by_author.html', context) 
 
-# def add_book(request):
-#     if request.method == 'POST':
-#         form = BookForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('book_list')
-#         else:
-#             form = BookForm()
-#         return render( request, 'library/add_book.html', {'form': form} )
 
 def add_book(request):
     if request.method == 'POST':
@@ -60,3 +51,30 @@ def add_book(request):
 
     # Always return a response
     return render(request, 'library/add_book.html', {'form': form})
+
+def add_book_and_author(request):
+    if request.method == 'POST':
+        book_form = AuthorFormWithoutAuthor(request.POST)
+        author_form = AuthorForm(request.POST)
+
+        if book_form.is_valid() and author_form.is_valid():
+            author = author_form.save()
+
+            book = book_form.save(commit=False)
+            book.authors = author
+            book.save()
+
+            book_form.instance = book
+            book_form.save_m2m()   # ✅ THIS now works
+
+            return redirect('book_list_fbv')
+
+    else:
+        book_form = AuthorFormWithoutAuthor()
+        author_form = AuthorForm()
+
+    context = {
+        'book_form': book_form,
+        'author_form': author_form
+    }
+    return render(request, 'library/add_book_and_author.html', context)
